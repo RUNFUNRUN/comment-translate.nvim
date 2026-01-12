@@ -1,6 +1,6 @@
 # comment-translate.nvim
 
-A Neovim plugin to automatically translate comments in your code using DeepL (or other backends).
+A Neovim plugin to automatically translate comments in your code using DeepL.
 
 ## Features
 - **Auto-translation**: Translates comments in the visible buffer area.
@@ -61,7 +61,6 @@ Default configuration:
 ```lua
 require("comment-translate").setup({
   enabled = true, -- Set to false to disable on startup
-  backend = 'deepl',
   client = {
     deepl = {
       is_pro = false, -- Set to true if using DeepL Pro
