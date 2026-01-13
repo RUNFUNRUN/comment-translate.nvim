@@ -3,6 +3,7 @@
 A Neovim plugin to automatically translate comments in your code using DeepL.
 
 ## Features
+
 - **Auto-translation**: Translates comments in the visible buffer area.
 - **Lazy Loading**: Only translates what you see to save API usage.
 - **Virtual Text**: Displays translations unobtrusively below the code.
@@ -16,13 +17,15 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 {
   "runfunrun/comment-translate.nvim",
   dependencies = { "nvim-lua/plenary.nvim" },
-  opts = {
-    client = {
-      deepl = {
-        api_key = os.getenv("DEEPL_API_KEY"),
-      }
-    }
-  }
+  init = function()
+    require("comment-translate").setup({
+      client = {
+        deepl = {
+          api_key = os.getenv("DEEPL_API_KEY"),
+        },
+      },
+    })
+  end,
 }
 ```
 
@@ -56,6 +59,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```
 
 ### Configuration
+
 Default configuration:
 
 ```lua
@@ -77,9 +81,11 @@ require("comment-translate").setup({
 ```
 
 ## Commands
+
 - `:CommentTranslateToggle`: Enable/Disable the plugin globally.
 
 ## Requirements
+
 - `nvim-lua/plenary.nvim`
 - Neovim >= 0.9.0
 - `curl`
