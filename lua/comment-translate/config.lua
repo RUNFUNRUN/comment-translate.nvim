@@ -2,7 +2,7 @@
 local default_config = {
   ---@type boolean
   enabled = true,
-  ---@type 'deepl' | 'google' | 'custom'
+  ---@type 'deepl'
   backend = "deepl",
   client = {
     deepl = {
