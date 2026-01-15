@@ -2,6 +2,8 @@
 
 A Neovim plugin to automatically translate comments in your code using DeepL.
 
+<img width="1800" height="1169" alt="スクリーンショット 2026-01-15 23 32 46" src="https://github.com/user-attachments/assets/d9501b42-a356-4cb6-8643-b7c97c15fecb" />
+
 ## Features
 
 - **Auto-translation**: Translates comments in the visible buffer area.
