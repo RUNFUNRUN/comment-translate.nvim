@@ -13,7 +13,7 @@ local default_config = {
   ui = {
     ---@type 'eol' | 'below' | 'overlay'
     position = "below",
-    max_width = 80,
+    max_width = nil, -- nil = auto (follow window width)
   },
   api = {
     debounce_ms = 500,

@@ -99,7 +99,99 @@ function M.scan_comments(bufnr, start_row, end_row)
     end
   end
 
-  return comments
+  -- Merge consecutive comments
+  return M.merge_consecutive_comments(comments)
+end
+
+---Merge consecutive single-line comments into a single CommentRange
+---Comments are considered consecutive if:
+---  1. Their row numbers are adjacent (end_row + 1 == next start_row)
+---  2. They have the same indentation (start_col)
+---@param comments CommentRange[]
+---@return CommentRange[]
+function M.merge_consecutive_comments(comments)
+  if #comments <= 1 then
+    return comments
+  end
+
+  -- Sort by start_row to ensure proper ordering
+  table.sort(comments, function(a, b)
+    return a.start_row < b.start_row
+  end)
+
+  ---Check if a comment is empty (only comment markers and whitespace)
+  ---@param comment CommentRange
+  ---@return boolean
+  local function is_empty_comment(comment)
+    for _, line in ipairs(comment.lines) do
+      -- Remove common comment prefixes and whitespace
+      local content = line:gsub("^%s*[-/#*]+%s*", "")
+      if content ~= "" then
+        return false
+      end
+    end
+    return true
+  end
+
+  local merged = {}
+  local current = comments[1]
+
+  -- Skip if current is empty
+  if is_empty_comment(current) then
+    current = nil
+  end
+
+  for i = 2, #comments do
+    local next_comment = comments[i]
+
+    -- Skip empty comments (they act as separators)
+    if is_empty_comment(next_comment) then
+      if current then
+        table.insert(merged, current)
+        current = nil
+      end
+      goto continue
+    end
+
+    if current == nil then
+      current = next_comment
+      goto continue
+    end
+
+    -- Check if comments are consecutive and have same indentation
+    local is_consecutive = (current.end_row + 1 == next_comment.start_row)
+    local same_indent = (current.start_col == next_comment.start_col)
+
+    if is_consecutive and same_indent then
+      -- Merge: extend current comment to include next
+      for _, line in ipairs(next_comment.lines) do
+        table.insert(current.lines, line)
+      end
+      current.end_row = next_comment.end_row
+      current.end_col = next_comment.end_col
+      -- Update ID to reflect merged range
+      current.id = string.format(
+        "%d:%d-%d:%d",
+        current.start_row,
+        current.start_col,
+        current.end_row,
+        current.end_col
+      )
+    else
+      -- Not consecutive, save current and start new group
+      table.insert(merged, current)
+      current = next_comment
+    end
+
+    ::continue::
+  end
+
+  -- Don't forget the last group
+  if current then
+    table.insert(merged, current)
+  end
+
+  return merged
 end
 
 ---Check if cursor is currently inside a comment

@@ -21,7 +21,7 @@ function M.setup(opts)
 
   local last_comment_id = nil
 
-  vim.api.nvim_create_autocmd({ "WinScrolled" }, {
+  vim.api.nvim_create_autocmd({ "WinScrolled", "WinResized" }, {
     group = group,
     callback = function()
       M.update_visible()
