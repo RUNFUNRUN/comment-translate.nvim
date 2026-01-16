@@ -5,20 +5,19 @@ local ui = require("comment-translate.ui")
 
 local M = {}
 
----Setup the plugin
+---@diagnostic disable-next-line: undefined-field
+local timer = (vim.uv or vim.loop).new_timer()
+
 ---@param opts? CommentTranslate.Config
 function M.setup(opts)
   config.setup(opts)
 
-  -- Setup commands
   vim.api.nvim_create_user_command("CommentTranslateToggle", function()
     M.toggle()
   end, {})
 
-  -- Autocommand for Lazy Loading
   local group =
     vim.api.nvim_create_augroup("CommentTranslate", { clear = true })
-
   local last_comment_id = nil
 
   vim.api.nvim_create_autocmd({ "WinScrolled", "WinResized" }, {
@@ -42,7 +41,6 @@ function M.setup(opts)
     end,
   })
 
-  -- Initialize enabled state
   M._enabled = config.options.enabled
   if M._enabled then
     M.update_visible()
@@ -65,26 +63,18 @@ function M.toggle()
   end
 end
 
--- Debounce timer
----@diagnostic disable-next-line: undefined-field
-local timer = (vim.uv or vim.loop).new_timer()
-
 function M.update_visible()
-  if not M._enabled then
+  if not M._enabled or not timer then
     return
   end
 
-  -- Debounce
-  if not timer then
-    return
-  end
   timer:stop()
   timer:start(
     config.options.api.debounce_ms,
     0,
     vim.schedule_wrap(function()
       local bufnr = vim.api.nvim_get_current_buf()
-      -- Skip excluded filetypes
+
       if
         vim.tbl_contains(
           config.options.exclude_filetypes,
@@ -96,21 +86,15 @@ function M.update_visible()
 
       local winid = vim.api.nvim_get_current_win()
       local info = vim.fn.getwininfo(winid)[1]
-      local start_line = info.topline - 1
-      local end_line = info.botline
-
-      local comments = scanner.scan_comments(bufnr, start_line, end_line)
+      local comments =
+        scanner.scan_comments(bufnr, info.topline - 1, info.botline)
 
       for _, comment in ipairs(comments) do
         local text = table.concat(comment.lines, "\n")
-        -- Remove comment syntax prefixes like //, #, --, etc.
         text = text:gsub("^%s*[-/#]+%s*", ""):gsub("\n%s*[-/#]+%s*", "\n")
 
         api.translate(text, function(translation, err)
-          if err then
-            return
-          end
-          if translation then
+          if not err and translation then
             ui.render(bufnr, comment, translation, winid)
           end
         end)

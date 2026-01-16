@@ -7,17 +7,17 @@ local default_config = {
   client = {
     deepl = {
       api_key = os.getenv("DEEPL_API_KEY") or "",
-      is_pro = false, -- Set to true if using DeepL Pro
+      is_pro = false,
     },
   },
   ui = {
     ---@type 'eol' | 'below' | 'overlay'
     position = "below",
-    max_width = nil, -- nil = auto (follow window width)
+    max_width = nil,
   },
   api = {
     debounce_ms = 500,
-    lang = "JA", -- Target language (e.g. JA, EN, FR)
+    lang = "JA",
   },
   ---@type table<string, boolean>
   exclude_filetypes = {
